@@ -1,2 +1,5 @@
 .DS_Store
 *.csv
+.env
+test.py
+v2/__pycache__

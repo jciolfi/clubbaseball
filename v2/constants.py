@@ -1,0 +1,9 @@
+SECURE_SESSIONID = 'GCDOTCOM_SECURE_SESSIONID'
+SESSIONID = 'GCDOTCOM_SESSIONID'
+SET_COOKIE = 'Set-Cookie'
+CSRFTOKEN = 'csrftoken'
+
+BASE_URL = 'https://gc.com'
+LOGIN_URI = '/login'
+DO_LOGIN_URI = '/do-login'
+DO_LOGOUT_URI = '/do-logout'
