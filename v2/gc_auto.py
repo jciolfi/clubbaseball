@@ -1,5 +1,6 @@
 import requests, os, re, sys
 from dotenv import load_dotenv
+from urllib.parse import urlparse, parse_qs
 from bs4 import BeautifulSoup
 from constants import *
 
@@ -39,7 +40,7 @@ def POST_login(session, csrfmiddlewaretoken):
     headers = {
         'Referer': 'https://gc.com/login',
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Cookie': f'{session_cookies}; {LAST_VIEWED}={TEAM_ID}'
+        'Cookie': session_cookies
     }
     
     response = session.request('POST', BASE_URL + DO_LOGIN_URI, headers=headers, data=payload)
@@ -51,26 +52,48 @@ def POST_logout(session, csrfmiddlewaretoken):
     headers = {
         'Referer': 'https://gc.com/login',
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Cookie': f'{session_cookies}; {LAST_VIEWED}={TEAM_ID}'
+        'Cookie': session_cookies
     }
     response = session.request("POST", BASE_URL + DO_LOGOUT_URI, headers=headers, data=payload)
     print(f'logout: {response}')
     print(response.headers)
 
-def get_stats(session, url):
+def GET_stats(session, url):
+    if not url:
+        print('Invalid GameChanger URL specified')
+        sys.exit(0)
     
+    parsed = urlparse(url)
+    path_parts = parsed.path.split('/')
+    try:
+        team_id = path_parts[-2]
+        team_id = team_id[team_id.rfind('-') + 1:]
+    except IndexError:
+        print('Could not find team ID')
+        sys.exit(0)
+    
+
+    
+    query_parts = parse_qs(parsed.query)
+    start_ts = query_parts.get('start_ts', [None])[0]
+    end_ts = query_parts.get('end_ts', [None])[0]
+
+    print(f'team_id={team_id}, start_ts={start_ts}, end_ts={end_ts}')
+
+
 
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print('Must specify stats link to pull from. For example:')
-        print(f'    python gc_auto.py "https://gc.com/t/spring-2023/northeastern-university-huskies-club-640424614cea87ae8c000001/stats?start_ts=1682866800&end_ts=1682866800"')
+        print(f'  python gc_auto.py "https://gc.com/t/spring-2023/northeastern-university-huskies-club-640424614cea87ae8c000001/stats?start_ts=1682866800&end_ts=1682866800"')
         sys.exit(0)
 
     gc_init()
 
     with requests.Session() as session:
-        csrfmiddlewaretoken = GET_login(session)
-        print(csrfmiddlewaretoken)
+        # csrfmiddlewaretoken = GET_login(session)
+        # print(csrfmiddlewaretoken)
         # POST_login(session, csrfmiddlewaretoken)
         # POST_logout(session, csrfmiddlewaretoken)
+        GET_stats(session, sys.argv[1])
