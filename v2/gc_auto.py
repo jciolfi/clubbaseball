@@ -80,9 +80,7 @@ def GET_stats(session, url):
     end_ts = query_parts.get('end_ts', [None])[0]
 
     # print(f'team_id={team_id}, start_ts={start_ts}, end_ts={end_ts}')
-    GET_batting_standard(session, team_id, start_ts, end_ts)
-    # GET_batting_psp(session, team_id, start_ts, end_ts)
-    # GET_batting_qabs(session, team_id, start_ts, end_ts)
+    GET_batting(session, team_id, start_ts, end_ts)
 
     # GET_pitching_standard(session, team_id, start_ts, end_ts)
     # GET_pitching_command(session, team_id, start_ts, end_ts)
@@ -90,16 +88,16 @@ def GET_stats(session, url):
     # GET_pitching_runs(session, team_id, start_ts, end_ts)
 
 # return true if successful. If successful move to next stat category in batting
-def GET_batting_standard(session, team_id, start_ts, end_ts):
-    full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_STANDARD}'
+def GET_batting(session, team_id, start_ts, end_ts):
+    # Parse the "Batting Standard" page
+    full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_STANDARD}&start_ts={start_ts}&end_ts={end_ts}'
     payload = {}
     headers = {
         'Cookie': session_cookies
     }
     response = requests.request("GET", full_url, headers=headers, data=payload)
-    response_json = response.json()
 
-    for player in response_json['players']:
+    for player in response.json()['players']:
         player_name = format_name(player['row_info']['player_name'])
         temp_stats = {}
         for stat in player['stats']:
@@ -118,8 +116,61 @@ def GET_batting_standard(session, team_id, start_ts, end_ts):
         player_hitting.hbp = int(temp_stats['HBP'])
         
         HITTING_STATS[player_name] = player_hitting
-        print(HITTING_STATS)
-        break
+    
+    GET_batting_psp(session, team_id, start_ts, end_ts)
+
+def GET_batting_psp(session, team_id, start_ts, end_ts):
+    # Parse the "Patience, Speed, & Power" page
+    full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_PSP}&start_ts={start_ts}&end_ts={end_ts}'
+    payload = {}
+    headers = { 
+        'Cookie': session_cookies
+    }
+    response = requests.request("GET", full_url, headers=headers, data=payload)
+
+    for player in response.json()['players']:
+        player_name = format_name(player['row_info']['player_name'])
+        player_stats = HITTING_STATS[player_name]
+        stats_inputted = 0
+        for stat in player['stats']:
+            if stat['identifier']['key'] == 'SB':
+                player_stats.sb = stat['value']
+                stats_inputted += 1
+            elif stat['identifier']['key'] == 'CS':
+                player_stats.cs = stat['value']
+                stats_inputted += 1
+
+            if stats_inputted >= 2:
+                break
+    
+    GET_batting_qabs(session, team_id, start_ts, end_ts)
+
+
+def GET_batting_qabs(session, team_id, start_ts, end_ts):
+    # Parse the "QABs & Team Impact" page
+    full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_QABS}&start_ts={start_ts}&end_ts={end_ts}'
+    payload = {}
+    headers = { 
+        'Cookie': session_cookies
+    }
+    response = requests.request("GET", full_url, headers=headers, data=payload)
+
+    for player in response.json()['players']:
+        player_name = format_name(player['row_info']['player_name'])
+        player_stats = HITTING_STATS[player_name]
+        stats_inputted = 0
+        for stat in player['stats']:
+            if stat['identifier']['key'] == 'SHB':
+                player_stats.sac_b = stat['value']
+                stats_inputted += 1
+            elif stat['identifier']['key'] == 'SHF':
+                player_stats.sac_f = stat['value']
+                stats_inputted += 1
+
+            if stats_inputted >= 2:
+                break
+
+    print(HITTING_STATS)
 
 
 if __name__ == "__main__":
