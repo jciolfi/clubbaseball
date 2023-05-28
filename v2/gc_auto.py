@@ -11,7 +11,7 @@ def gc_init():
 
     # Set session cookies
     global session_cookies
-    session_cookies = f'{CSRFTOKEN}={os.getenv(CSRFTOKEN)}; {SECURE_SESSIONID}={os.getenv(SECURE_SESSIONID)}; {SESSIONID}={os.getenv(SESSIONID)}; {LAST_VIEWED}={os.getenv(LAST_VIEWED)}'
+    session_cookies = f'{CSRFTOKEN}={os.getenv(CSRFTOKEN)}; {SECURE_SESSIONID}={os.getenv(SECURE_SESSIONID)}; {SESSIONID}={os.getenv(SESSIONID)}'
 
 def GET_login(session):
     payload={}
@@ -20,6 +20,8 @@ def GET_login(session):
     }
 
     resp = session.request("GET", BASE_URL + LOGIN_URI, headers=headers, data=payload)
+    print(resp)
+    print(resp.text)
 
     csrfmiddlewaretoken_pattern = re.compile(r"name='csrfmiddlewaretoken' value='([A-Za-z0-9]+)'")
     try:
@@ -39,7 +41,7 @@ def POST_login(session, csrfmiddlewaretoken):
         'Cookie': session_cookies
     }
     
-    response = session.request('POST', BASE_URL + LOGIN_URI, headers=headers, data=payload)
+    response = session.request('POST', BASE_URL + DO_LOGIN_URI, headers=headers, data=payload)
     print(f'login: {response}')
 
 def POST_logout(session, csrfmiddlewaretoken):
@@ -49,7 +51,7 @@ def POST_logout(session, csrfmiddlewaretoken):
         'Content-Type': 'application/x-www-form-urlencoded',
         'Cookie': session_cookies
     }
-    response = session.request("POST", BASE_URL + LOGOUT_URI, headers=headers, data=payload)
+    response = session.request("POST", BASE_URL + DO_LOGOUT_URI, headers=headers, data=payload)
     print(f'logout: {response}')
 
 

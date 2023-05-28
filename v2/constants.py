@@ -10,5 +10,5 @@ LAST_VIEWED = 'last_team_viewed'
 
 BASE_URL = 'https://gc.com'
 LOGIN_URI = '/login'
-LOGIN_URI = '/do-login'
-LOGOUT_URI = '/do-logout'
+DO_LOGIN_URI = '/do-login'
+DO_LOGOUT_URI = '/do-logout'
