@@ -1,10 +1,13 @@
 import requests, os, re, sys
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
-from bs4 import BeautifulSoup
 from constants import *
+from classes import *
+from helpers import *
 
 session_cookies = ''
+HITTING_STATS = {}
+PITCHING_STATS = {}
 
 def gc_init():
     # Load environment variables
@@ -72,15 +75,51 @@ def GET_stats(session, url):
         print('Could not find team ID')
         sys.exit(0)
     
-
-    
     query_parts = parse_qs(parsed.query)
     start_ts = query_parts.get('start_ts', [None])[0]
     end_ts = query_parts.get('end_ts', [None])[0]
 
-    print(f'team_id={team_id}, start_ts={start_ts}, end_ts={end_ts}')
+    # print(f'team_id={team_id}, start_ts={start_ts}, end_ts={end_ts}')
+    GET_batting_standard(session, team_id, start_ts, end_ts)
+    # GET_batting_psp(session, team_id, start_ts, end_ts)
+    # GET_batting_qabs(session, team_id, start_ts, end_ts)
 
+    # GET_pitching_standard(session, team_id, start_ts, end_ts)
+    # GET_pitching_command(session, team_id, start_ts, end_ts)
+    # GET_pitching_batter(session, team_id, start_ts, end_ts)
+    # GET_pitching_runs(session, team_id, start_ts, end_ts)
 
+# return true if successful. If successful move to next stat category in batting
+def GET_batting_standard(session, team_id, start_ts, end_ts):
+    full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_STANDARD}'
+    payload = {}
+    headers = {
+        'Cookie': session_cookies
+    }
+    response = requests.request("GET", full_url, headers=headers, data=payload)
+    response_json = response.json()
+
+    for player in response_json['players']:
+        player_name = format_name(player['row_info']['player_name'])
+        temp_stats = {}
+        for stat in player['stats']:
+            temp_stats[stat['identifier']['key']] = stat['value']
+
+        player_hitting = Hitting()
+        player_hitting.ab = int(temp_stats['AB'])
+        player_hitting.r = int(temp_stats['R'])
+        player_hitting.h = int(temp_stats['H'])
+        player_hitting.doubles = int(temp_stats['2B'])
+        player_hitting.triples = int(temp_stats['3B'])
+        player_hitting.hr = int(temp_stats['HR'])
+        player_hitting.rbi = int(temp_stats['RBI'])
+        player_hitting.bb = int(temp_stats['BB'])
+        player_hitting.so = int(temp_stats['SO'])
+        player_hitting.hbp = int(temp_stats['HBP'])
+        
+        HITTING_STATS[player_name] = player_hitting
+        print(HITTING_STATS)
+        break
 
 
 if __name__ == "__main__":
