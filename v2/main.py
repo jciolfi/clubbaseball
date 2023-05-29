@@ -16,6 +16,7 @@ if __name__ == "__main__":
     if args.help_me:
         print('This is a web scraper to export stats from GameChanger to a spreadsheet in the order the NCBA expects it.')
         print('\nINSTRUCTIONS:')
+        print('   0. Read README.md, make sure your .env is set up')
         print('   1. Navigate to GameChanger Classic. Log in and select the "Season Stats" tab. Select the appropriate date range')
         print('   2. Copy the URL in the top bar')
         print('   3. Type "python main.py <your_copied_url>')
