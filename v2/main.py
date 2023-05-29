@@ -1,19 +1,51 @@
 from gc_auto import *
-import requests
+import requests, argparse, sys
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print('Must specify stats link to pull from. For example:')
-        print(f'  python gc_auto.py "https://gc.com/t/spring-2023/northeastern-university-huskies-club-640424614cea87ae8c000001/stats?start_ts=1682866800&end_ts=1682866800"')
+    gc_url = None
+    hitting_name = None
+    pitching_name = None
+
+    parser = argparse.ArgumentParser(description='Process a URL.')
+    parser.add_argument('gamechanger_url', nargs='?', help='The GameChanger Season Stats URL to process')
+    parser.add_argument('--help-me', action='store_true', help='Display help message')
+    parser.add_argument('--hit', nargs='?', const='', help='Specify the filename for the hitting stats, e.g. UConn_hitting1')
+    parser.add_argument('--pitch', '--filename_p', nargs='?', const='', help='Specify the filename for the pitching stats, e.g. UConn_pitching1')
+
+    args = parser.parse_args()
+    if args.help_me:
+        print('This is a web scraper to export stats from GameChanger to a spreadsheet in the order the NCBA expects it.')
+        print('\n1. Navigate to GameChanger Classic. Log in and select the "Season Stats" tab. Select the appropriate date range')
+        print('2. Copy the URL in the top bar')
+        print('3. Type "python main.py <your_copied_url>')
+        print('4. If you would like to name the output spreadsheets, you can do so by appending "--hit <name>" and "--pitch <name>"')
+        print('   For example, "python main.py <your_copied_url> --hit <name> --pitch name"')
+        print('   Or, "python main.py https://gc.com/t/spring-2023/northeastern-university-huskies-club-640424614cea87ae8c000001/stats --hit UConn_hit1 --pitch UConn_pitch1"')
         sys.exit(0)
+    else:
+        gc_url = args.gamechanger_url
+        if not gc_url or not gc_url.startswith('https://gc.com/'):
+            print('Please input a GameChanger URL.')
+            print('If you need help, enter "python main.py --help-me"')
+            sys.exit(1)
+        
+        if args.hit == args.pitch:
+            print('The hitting and pitching files cannot have the same name.')
+            sys.exit(1)
+        
+        if args.hit:
+            hitting_name = args.hit
+        if args.pitch:
+            pitching_name = args.pitch
 
     gc_init()
 
     with requests.Session() as session:
-        # csrfmiddlewaretoken = GET_login(session)
-        # print(csrfmiddlewaretoken)
-        # POST_login(session, csrfmiddlewaretoken)
-        # POST_logout(session, csrfmiddlewaretoken)
-        hitting_stats, pitching_stats = GET_stats(session, sys.argv[1])
-        write_hitting_stats(None, hitting_stats)
-        write_pitching_stats(None, pitching_stats)
+        csrfmiddlewaretoken = GET_login(session)
+        if csrfmiddlewaretoken is not None:
+            print(f'csrfmiddlewaretoken = {csrfmiddlewaretoken}')
+            POST_login(session, csrfmiddlewaretoken)
+            POST_logout(session, csrfmiddlewaretoken)
+        hitting_stats, pitching_stats = GET_stats(session, gc_url)
+        write_hitting_stats(f'{hitting_name}.csv', hitting_stats)
+        write_pitching_stats(f'{pitching_name}.csv', pitching_stats)

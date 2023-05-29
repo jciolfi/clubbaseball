@@ -24,17 +24,15 @@ def GET_login(session):
     }
 
     resp = session.request("GET", BASE_URL + LOGIN_URI, headers=headers, data=payload)
-    print(resp)
-    print(resp.text)
-    print(resp.headers)
 
     csrfmiddlewaretoken_pattern = re.compile(r"name='csrfmiddlewaretoken' value='([A-Za-z0-9]+)'")
     try:
         csrfmiddlewaretoken = csrfmiddlewaretoken_pattern.findall(resp.text)[0]
         return csrfmiddlewaretoken
     except IndexError:
-        print(resp.text)
-        raise LookupError('Could not find csrfmiddlewaretoken in login page')
+        print('Could not find csrfmiddleware token in /login. Continuing, but stats may be wrong')
+        print('I am going to hope that you are already logged in.')
+        return None
     
 
 def POST_login(session, csrfmiddlewaretoken):
