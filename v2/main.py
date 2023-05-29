@@ -15,5 +15,5 @@ if __name__ == "__main__":
         # POST_login(session, csrfmiddlewaretoken)
         # POST_logout(session, csrfmiddlewaretoken)
         hitting_stats, pitching_stats = GET_stats(session, sys.argv[1])
-        write_hitting_stats(hitting_stats)
-        write_pitching_stats(pitching_stats)
+        write_hitting_stats(None, hitting_stats)
+        write_pitching_stats(None, pitching_stats)

@@ -90,7 +90,7 @@ def GET_pitching_runs(session, session_cookies, team_id, start_ts, end_ts, pitch
             if stat['identifier']['key'] == 'BK':
                 pitching_stats[player_name].bk = int(stat['value'])
                 stats_inputted += 1
-            elif stat['identifier']['key'] == 'PK':
+            elif stat['identifier']['key'] == 'PIK':
                 pitching_stats[player_name].pk = int(stat['value'])
                 stats_inputted += 1
             
