@@ -12,8 +12,9 @@ def GET_hitting(session, session_cookies, team_id, start_ts, end_ts):
     return hitting_stats
 
 
+# parse the "Batting Standard" page
 def GET_batting_standard(session, session_cookies, team_id, start_ts, end_ts, hitting_stats):
-    # parse the "Batting Standard" page
+    # send request for stats
     url = build_stat_url(team_id, BATTING_STANDARD, start_ts, end_ts)
     players_stats = get_players_stats(session, url, session_cookies)
 
@@ -39,8 +40,9 @@ def GET_batting_standard(session, session_cookies, team_id, start_ts, end_ts, hi
         hitting_stats[player_name] = player_hitting
 
 
+# Parse the "Patience, Speed, & Power" page
 def GET_batting_psp(session, session_cookies, team_id, start_ts, end_ts, hitting_stats):
-    # Parse the "Patience, Speed, & Power" page
+    # send request for stats
     url = build_stat_url(team_id, BATTING_PSP, start_ts, end_ts)
     players_stats = get_players_stats(session, url, session_cookies)
 
@@ -61,8 +63,9 @@ def GET_batting_psp(session, session_cookies, team_id, start_ts, end_ts, hitting
                 break
 
 
+# Parse the "QABs & Team Impact" page
 def GET_batting_qabs(session, session_cookies, team_id, start_ts, end_ts, hitting_stats):
-    # Parse the "QABs & Team Impact" page
+    # send request for stats
     url = build_stat_url(team_id, BATTING_QABS, start_ts, end_ts)
     players_stats = get_players_stats(session, url, session_cookies)
 

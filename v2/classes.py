@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+# dataclass for NCBA-ordered offensive stats
+# note: IBB is not stored in GameChanger Classic
 @dataclass
 class Hitting:
     ab: int = 0
@@ -19,6 +21,8 @@ class Hitting:
     hbp: int = 0
 
 
+# dataclass for the NCBA-ordered pitching stats
+# note: cg & sho are not stored in GameChanger Classic
 @dataclass
 class Pitching:
     started: int = 0
@@ -28,7 +32,7 @@ class Pitching:
     sho: str = 'N/A'
     sv: int = 0
     svo: int = 0
-    ip: str = 'N/A'
+    ip: str = ''
     h: int = 0
     r: int = 0
     er: int = 0
