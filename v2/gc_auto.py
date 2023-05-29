@@ -5,6 +5,7 @@ from constants import *
 from classes import *
 from helpers import *
 from gc_hitting import GET_hitting
+from gc_pitching import GET_pitching
 
 session_cookies = ''
 
@@ -81,7 +82,11 @@ def GET_stats(session, url):
     # print(f'team_id={team_id}, start_ts={start_ts}, end_ts={end_ts}')
 
     hitting_stats = GET_hitting(session, session_cookies, team_id, start_ts, end_ts)
-    print(hitting_stats)
+    # print(hitting_stats)
+
+    pitching_stats = GET_pitching(session, session_cookies, team_id, start_ts, end_ts)
+    print(pitching_stats)
+
 
     # GET_pitching_standard(session, team_id, start_ts, end_ts)
     # GET_pitching_command(session, team_id, start_ts, end_ts)
