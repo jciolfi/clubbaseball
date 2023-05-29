@@ -10,14 +10,17 @@ This is a more automated option. It will log in for you and output the same info
 
 ### .env
 Create a filename called `.env` in the `v2` folder. Copy and paste the following into it:
+
+```
 gcdotcom_secure_sessionid=
 gcdotcom_sessionid=
 csrftoken=
 last_team_viewed=640424614cea87ae8c000001
 email=
 password=
+```
 
-Fill out these values. Your email and password are what you use to log onto GameChanger. 
+Your email and password are what you use to log onto GameChanger. 
 
 Your gcdotcom_secure_sessionid, gcdotcom_sessionid, and csrftoken can be found by doing the following:
 1. Open the developer tools (F12 in chrome)
