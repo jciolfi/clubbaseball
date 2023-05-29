@@ -1,18 +1,18 @@
 from constants import *
-from helpers import format_name
+from helpers import *
 from classes import Pitching
 
 def GET_pitching(session, session_cookies, team_id, start_ts, end_ts):
     pitching_stats = {}
     GET_pitching_standard(session, session_cookies, team_id, start_ts, end_ts, pitching_stats)
-    # GET_pitching_command(session, session_cookies, team_id, start_ts, end_ts, pitching_stats)
-    # GET_pitching_batter(session, session_cookies, team_id, start_ts, end_ts, pitching_stats)
-    # GET_pitching_runs(session, session_cookies, team_id, start_ts, end_ts, pitching_stats)
+    GET_pitching_command(session, session_cookies, team_id, start_ts, end_ts, pitching_stats)
+    GET_pitching_batter(session, session_cookies, team_id, start_ts, end_ts, pitching_stats)
+    GET_pitching_runs(session, session_cookies, team_id, start_ts, end_ts, pitching_stats)
     return pitching_stats
 
 
 def GET_pitching_standard(session, session_cookies, team_id, start_ts, end_ts, pitching_stats):
-    full_url = f'{BASE_URL}{STATS_URI}{team_id}/{PITCHING_STANDARD}&start_ts={start_ts}&end_ts={end_ts}'
+    full_url = build_stat_url(team_id, PITCHING_STANDARD, start_ts, end_ts)
     payload = {}
     headers = {
         'Cookie': session_cookies
@@ -44,4 +44,55 @@ def GET_pitching_standard(session, session_cookies, team_id, start_ts, end_ts, p
 
 
 def GET_pitching_command(session, session_cookies, team_id, start_ts, end_ts, pitching_stats):
-    a = 1
+    full_url = build_stat_url(team_id, PITCHING_COMMAND, start_ts, end_ts)
+    payload = {}
+    headers = {
+        'Cookie': session_cookies
+    }
+    response = session.request("GET", full_url, headers=headers, data=payload)
+
+    for player in response.json()['players']:
+        player_name = format_name(player['row_info']['player_name'])
+        for stat in player['stats']:
+            if stat['identifier']['key'] == 'WP':
+                pitching_stats[player_name].wp = int(stat['value'])
+                break
+        
+        
+
+def GET_pitching_batter(session, session_cookies, team_id, start_ts, end_ts, pitching_stats):
+    full_url = build_stat_url(team_id, PITCHING_BATTER, start_ts, end_ts)
+    payload = {}
+    headers = {
+        'Cookie': session_cookies
+    }
+    response = session.request("GET", full_url, headers=headers, data=payload)
+
+    for player in response.json()['players']:
+        player_name = format_name(player['row_info']['player_name'])
+        for stat in player['stats']:
+            if stat['identifier']['key'] == 'HR':
+                pitching_stats[player_name].hr = int(stat['value'])
+                break
+
+def GET_pitching_runs(session, session_cookies, team_id, start_ts, end_ts, pitching_stats):
+    full_url = build_stat_url(team_id, PITCHING_RUNS, start_ts, end_ts)
+    payload = {}
+    headers = {
+        'Cookie': session_cookies
+    }
+    response = session.request("GET", full_url, headers=headers, data=payload)
+
+    for player in response.json()['players']:
+        player_name = format_name(player['row_info']['player_name'])
+        stats_inputted = 0
+        for stat in player['stats']:
+            if stat['identifier']['key'] == 'BK':
+                pitching_stats[player_name].bk = int(stat['value'])
+                stats_inputted += 1
+            elif stat['identifier']['key'] == 'PK':
+                pitching_stats[player_name].pk = int(stat['value'])
+                stats_inputted += 1
+            
+            if stats_inputted >= 2:
+                break

@@ -1,5 +1,5 @@
 from constants import *
-from helpers import format_name
+from helpers import *
 from classes import Hitting
 
 def GET_hitting(session, session_cookies, team_id, start_ts, end_ts):
@@ -12,7 +12,8 @@ def GET_hitting(session, session_cookies, team_id, start_ts, end_ts):
 
 def GET_batting_standard(session, session_cookies, team_id, start_ts, end_ts, hitting_stats):
     # Parse the "Batting Standard" page
-    full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_STANDARD}&start_ts={start_ts}&end_ts={end_ts}'
+    # full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_STANDARD}&start_ts={start_ts}&end_ts={end_ts}'
+    full_url = build_stat_url(team_id, BATTING_STANDARD, start_ts, end_ts)
     payload = {}
     headers = {
         'Cookie': session_cookies
@@ -42,7 +43,8 @@ def GET_batting_standard(session, session_cookies, team_id, start_ts, end_ts, hi
 
 def GET_batting_psp(session, session_cookies, team_id, start_ts, end_ts, hitting_stats):
     # Parse the "Patience, Speed, & Power" page
-    full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_PSP}&start_ts={start_ts}&end_ts={end_ts}'
+    # full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_PSP}&start_ts={start_ts}&end_ts={end_ts}'
+    full_url = build_stat_url(team_id, BATTING_PSP, start_ts, end_ts)
     payload = {}
     headers = { 
         'Cookie': session_cookies
@@ -67,7 +69,8 @@ def GET_batting_psp(session, session_cookies, team_id, start_ts, end_ts, hitting
 
 def GET_batting_qabs(session, session_cookies, team_id, start_ts, end_ts, hitting_stats):
     # Parse the "QABs & Team Impact" page
-    full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_QABS}&start_ts={start_ts}&end_ts={end_ts}'
+    # full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_QABS}&start_ts={start_ts}&end_ts={end_ts}'
+    full_url = build_stat_url(team_id, BATTING_QABS, start_ts, end_ts)
     payload = {}
     headers = { 
         'Cookie': session_cookies

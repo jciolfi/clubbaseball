@@ -1,4 +1,4 @@
-import os, re, sys
+import os, re, sys, requests
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
 from constants import *
@@ -79,10 +79,10 @@ def GET_stats(session, url):
     start_ts = query_parts.get('start_ts', [None])[0]
     end_ts = query_parts.get('end_ts', [None])[0]
 
-    # print(f'team_id={team_id}, start_ts={start_ts}, end_ts={end_ts}')
-
     hitting_stats = GET_hitting(session, session_cookies, team_id, start_ts, end_ts)
-    # print(hitting_stats)
+    print(hitting_stats)
+
+    print('\n\n\n\n')
 
     pitching_stats = GET_pitching(session, session_cookies, team_id, start_ts, end_ts)
     print(pitching_stats)
