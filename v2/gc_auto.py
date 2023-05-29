@@ -15,19 +15,44 @@ def gc_init():
 
     # Set session cookies
     global session_cookies
-    session_cookies = f'{CSRFTOKEN}={os.getenv(CSRFTOKEN)}; {SECURE_SESSIONID}={os.getenv(SECURE_SESSIONID)}; {SESSIONID}={os.getenv(SESSIONID)}'
+    session_cookies = f'{SECURE_SESSIONID}={os.getenv(SECURE_SESSIONID)}; {SESSIONID}={os.getenv(SESSIONID)}'
 
 def GET_login(session):
+    global session_cookies
     payload={}
     headers = {
         'Cookie': session_cookies
     }
 
-    resp = session.request("GET", BASE_URL + LOGIN_URI, headers=headers, data=payload)
+    response = session.request("GET", BASE_URL + LOGIN_URI, headers=headers, data=payload)
+
+    print(f'LOGIN STATUS: {response.status_code}')
+
+    # Response Headers
+    csrftoken_pattern = re.compile(r"csrftoken=([A-Za-z0-9]+);")
+    for header, value in response.headers.items():
+        if header == 'Set-Cookie':
+            try:
+                print(f'\n{header}: {value}\n')
+
+                csrftoken = csrftoken_pattern.findall(value)[0]
+                session_cookies = f'{CSRFTOKEN}={csrftoken}; {session_cookies}'
+                print(f'SESSION_COOKIES: {session_cookies}')
+                break
+            except IndexError:
+                print('Could not find csrftoken token in /login.')
+                print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
+                print('---------------------------------------------------------------------------------------')
+            
+            
+
+    if response.status_code != 200:
+        print('Unable to log in. Are your email and password correct?')
+        sys.exit(0)
 
     csrfmiddlewaretoken_pattern = re.compile(r"name='csrfmiddlewaretoken' value='([A-Za-z0-9]+)'")
     try:
-        csrfmiddlewaretoken = csrfmiddlewaretoken_pattern.findall(resp.text)[0]
+        csrfmiddlewaretoken = csrfmiddlewaretoken_pattern.findall(response.text)[0]
         return csrfmiddlewaretoken
     except IndexError:
         print('Could not find csrfmiddleware token in /login.')
