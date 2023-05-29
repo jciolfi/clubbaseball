@@ -2,7 +2,9 @@ from constants import *
 from helpers import *
 from classes import Pitching
 
+# return a dictionary of {str} -> {Pitching} that holds a player name and their pitching stats
 def GET_pitching(session, session_cookies, team_id, start_ts, end_ts):
+    # parse necessary tables to populate pitching stats for each player
     pitching_stats = {}
     GET_pitching_standard(session, session_cookies, team_id, start_ts, end_ts, pitching_stats)
     GET_pitching_command(session, session_cookies, team_id, start_ts, end_ts, pitching_stats)
@@ -11,15 +13,14 @@ def GET_pitching(session, session_cookies, team_id, start_ts, end_ts):
     return pitching_stats
 
 
+# parse stats from the "Pitching -> Standard" tab
 def GET_pitching_standard(session, session_cookies, team_id, start_ts, end_ts, pitching_stats):
-    full_url = build_stat_url(team_id, PITCHING_STANDARD, start_ts, end_ts)
-    payload = {}
-    headers = {
-        'Cookie': session_cookies
-    }
-    response = session.request("GET", full_url, headers=headers, data=payload)
+    # get player stats for pitching standard; expect json response
+    url = build_stat_url(team_id, PITCHING_STANDARD, start_ts, end_ts)
+    players_stats = get_players_stats(session, url, session_cookies)
 
-    for player in response.json()['players']:
+    # extract GS, W, L, SV, SVO, IP, H, R, ER, HBP, BB, SO
+    for player in players_stats:
         player_name = format_name(player['row_info']['player_name'])
         temp_stats = {}
         for stat in player['stats']:
@@ -43,15 +44,14 @@ def GET_pitching_standard(session, session_cookies, team_id, start_ts, end_ts, p
         pitching_stats[player_name] = player_pitching
 
 
+# parse stats from the "Pitching -> Command" tab
 def GET_pitching_command(session, session_cookies, team_id, start_ts, end_ts, pitching_stats):
-    full_url = build_stat_url(team_id, PITCHING_COMMAND, start_ts, end_ts)
-    payload = {}
-    headers = {
-        'Cookie': session_cookies
-    }
-    response = session.request("GET", full_url, headers=headers, data=payload)
+    # get player stats for pitching command; expect json response
+    url = build_stat_url(team_id, PITCHING_COMMAND, start_ts, end_ts)
+    players_stats = get_players_stats(session, url, session_cookies)
 
-    for player in response.json()['players']:
+    # extract WP
+    for player in players_stats:
         player_name = format_name(player['row_info']['player_name'])
         for stat in player['stats']:
             if stat['identifier']['key'] == 'WP':
@@ -59,31 +59,29 @@ def GET_pitching_command(session, session_cookies, team_id, start_ts, end_ts, pi
                 break
         
         
-
+# parse stats from the "Pitching -> Batter Results" tab
 def GET_pitching_batter(session, session_cookies, team_id, start_ts, end_ts, pitching_stats):
-    full_url = build_stat_url(team_id, PITCHING_BATTER, start_ts, end_ts)
-    payload = {}
-    headers = {
-        'Cookie': session_cookies
-    }
-    response = session.request("GET", full_url, headers=headers, data=payload)
+    # get player stats for pitching batter results; expect json response
+    url = build_stat_url(team_id, PITCHING_BATTER, start_ts, end_ts)
+    players_stats = get_players_stats(session, url, session_cookies)
 
-    for player in response.json()['players']:
+    # extract HR
+    for player in players_stats:
         player_name = format_name(player['row_info']['player_name'])
         for stat in player['stats']:
             if stat['identifier']['key'] == 'HR':
                 pitching_stats[player_name].hr = int(stat['value'])
                 break
 
-def GET_pitching_runs(session, session_cookies, team_id, start_ts, end_ts, pitching_stats):
-    full_url = build_stat_url(team_id, PITCHING_RUNS, start_ts, end_ts)
-    payload = {}
-    headers = {
-        'Cookie': session_cookies
-    }
-    response = session.request("GET", full_url, headers=headers, data=payload)
 
-    for player in response.json()['players']:
+# parse stats from the "Pitching -> Runs & Running Game" tab
+def GET_pitching_runs(session, session_cookies, team_id, start_ts, end_ts, pitching_stats):
+    # get player stats for pitching runs & running game; expect json response
+    url = build_stat_url(team_id, PITCHING_RUNS, start_ts, end_ts)
+    players_stats = get_players_stats(session, url, session_cookies)
+
+    # extract BK and PIK
+    for player in players_stats:
         player_name = format_name(player['row_info']['player_name'])
         stats_inputted = 0
         for stat in player['stats']:

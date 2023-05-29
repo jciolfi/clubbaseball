@@ -2,7 +2,9 @@ from constants import *
 from helpers import *
 from classes import Hitting
 
+# return a dictionary of {str} -> {Hitting} that holds a player name and their hitting stats
 def GET_hitting(session, session_cookies, team_id, start_ts, end_ts):
+    # parse necessary tables to populate hitting stats for each player
     hitting_stats = {}
     GET_batting_standard(session, session_cookies, team_id, start_ts, end_ts, hitting_stats)
     GET_batting_psp(session, session_cookies, team_id, start_ts, end_ts, hitting_stats)
@@ -11,16 +13,12 @@ def GET_hitting(session, session_cookies, team_id, start_ts, end_ts):
 
 
 def GET_batting_standard(session, session_cookies, team_id, start_ts, end_ts, hitting_stats):
-    # Parse the "Batting Standard" page
-    # full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_STANDARD}&start_ts={start_ts}&end_ts={end_ts}'
-    full_url = build_stat_url(team_id, BATTING_STANDARD, start_ts, end_ts)
-    payload = {}
-    headers = {
-        'Cookie': session_cookies
-    }
-    response = session.request("GET", full_url, headers=headers, data=payload)
+    # parse the "Batting Standard" page
+    url = build_stat_url(team_id, BATTING_STANDARD, start_ts, end_ts)
+    players_stats = get_players_stats(session, url, session_cookies)
 
-    for player in response.json()['players']:
+    # extract AB, R, H, 2B, 3B, HR, RBI, BB, SO, HBP
+    for player in players_stats:
         player_name = format_name(player['row_info']['player_name'])
         temp_stats = {}
         for stat in player['stats']:
@@ -43,15 +41,11 @@ def GET_batting_standard(session, session_cookies, team_id, start_ts, end_ts, hi
 
 def GET_batting_psp(session, session_cookies, team_id, start_ts, end_ts, hitting_stats):
     # Parse the "Patience, Speed, & Power" page
-    # full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_PSP}&start_ts={start_ts}&end_ts={end_ts}'
-    full_url = build_stat_url(team_id, BATTING_PSP, start_ts, end_ts)
-    payload = {}
-    headers = { 
-        'Cookie': session_cookies
-    }
-    response = session.request("GET", full_url, headers=headers, data=payload)
+    url = build_stat_url(team_id, BATTING_PSP, start_ts, end_ts)
+    players_stats = get_players_stats(session, url, session_cookies)
 
-    for player in response.json()['players']:
+    # extract SB and CS
+    for player in players_stats:
         player_name = format_name(player['row_info']['player_name'])
         player_stats = hitting_stats[player_name]
         stats_inputted = 0
@@ -69,15 +63,11 @@ def GET_batting_psp(session, session_cookies, team_id, start_ts, end_ts, hitting
 
 def GET_batting_qabs(session, session_cookies, team_id, start_ts, end_ts, hitting_stats):
     # Parse the "QABs & Team Impact" page
-    # full_url = f'{BASE_URL}{STATS_URI}{team_id}/{BATTING_QABS}&start_ts={start_ts}&end_ts={end_ts}'
-    full_url = build_stat_url(team_id, BATTING_QABS, start_ts, end_ts)
-    payload = {}
-    headers = { 
-        'Cookie': session_cookies
-    }
-    response = session.request("GET", full_url, headers=headers, data=payload)
+    url = build_stat_url(team_id, BATTING_QABS, start_ts, end_ts)
+    players_stats = get_players_stats(session, url, session_cookies)
 
-    for player in response.json()['players']:
+    # extract SHB and SHF
+    for player in players_stats:
         player_name = format_name(player['row_info']['player_name'])
         player_stats = hitting_stats[player_name]
         stats_inputted = 0
