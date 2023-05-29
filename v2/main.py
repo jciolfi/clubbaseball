@@ -15,12 +15,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.help_me:
         print('This is a web scraper to export stats from GameChanger to a spreadsheet in the order the NCBA expects it.')
-        print('\n1. Navigate to GameChanger Classic. Log in and select the "Season Stats" tab. Select the appropriate date range')
-        print('2. Copy the URL in the top bar')
-        print('3. Type "python main.py <your_copied_url>')
-        print('4. If you would like to name the output spreadsheets, you can do so by appending "--hit <name>" and "--pitch <name>"')
-        print('   For example, "python main.py <your_copied_url> --hit <name> --pitch name"')
-        print('   Or, "python main.py https://gc.com/t/spring-2023/northeastern-university-huskies-club-640424614cea87ae8c000001/stats --hit UConn_hit1 --pitch UConn_pitch1"')
+        print('\nINSTRUCTIONS:')
+        print('   1. Navigate to GameChanger Classic. Log in and select the "Season Stats" tab. Select the appropriate date range')
+        print('   2. Copy the URL in the top bar')
+        print('   3. Type "python main.py <your_copied_url>')
+        print('   4. If you would like to name the output spreadsheets, you can do so by appending "--hit <name>" and "--pitch <name>"')
+        print('      If you do not specify names, they will be called output_hitting and output_pitching, respectively')
+        print('\nEXAMPLE USAGE:')
+        print('   "python main.py <your_copied_url> --hit <name> --pitch name"')
+        print('   "python main.py https://gc.com/t/spring-2023/northeastern-university-huskies-club-640424614cea87ae8c000001/stats --hit UConn_hit1 --pitch UConn_pitch1"')
         sys.exit(0)
     else:
         gc_url = args.gamechanger_url
@@ -32,7 +35,6 @@ if __name__ == "__main__":
         if args.hit == args.pitch:
             print('The hitting and pitching files cannot have the same name.')
             sys.exit(1)
-        
         if args.hit:
             hitting_name = args.hit
         if args.pitch:

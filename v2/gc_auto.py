@@ -30,8 +30,9 @@ def GET_login(session):
         csrfmiddlewaretoken = csrfmiddlewaretoken_pattern.findall(resp.text)[0]
         return csrfmiddlewaretoken
     except IndexError:
-        print('Could not find csrfmiddleware token in /login. Continuing, but stats may be wrong')
-        print('I am going to hope that you are already logged in.')
+        print('Could not find csrfmiddleware token in /login.')
+        print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
+        print('---------------------------------------------------------------------------------------')
         return None
     
 
