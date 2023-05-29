@@ -1,7 +1,6 @@
 from gc_auto import *
 import requests
 
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print('Must specify stats link to pull from. For example:')
@@ -15,4 +14,6 @@ if __name__ == "__main__":
         # print(csrfmiddlewaretoken)
         # POST_login(session, csrfmiddlewaretoken)
         # POST_logout(session, csrfmiddlewaretoken)
-        GET_stats(session, sys.argv[1])
+        hitting_stats, pitching_stats = GET_stats(session, sys.argv[1])
+        write_hitting_stats(hitting_stats)
+        write_pitching_stats(pitching_stats)

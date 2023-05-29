@@ -1,4 +1,4 @@
-import os, re, sys, requests
+import os, re, sys, csv
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
 from constants import *
@@ -61,6 +61,7 @@ def POST_logout(session, csrfmiddlewaretoken):
     print(f'logout: {response}')
     print(response.headers)
 
+
 def GET_stats(session, url):
     if not url:
         print('Invalid GameChanger URL specified')
@@ -82,13 +83,75 @@ def GET_stats(session, url):
     hitting_stats = GET_hitting(session, session_cookies, team_id, start_ts, end_ts)
     print(hitting_stats)
 
-    print('\n\n\n\n')
+    print('\n\n\n')
 
     pitching_stats = GET_pitching(session, session_cookies, team_id, start_ts, end_ts)
     print(pitching_stats)
 
+    return hitting_stats, pitching_stats
 
-    # GET_pitching_standard(session, team_id, start_ts, end_ts)
-    # GET_pitching_command(session, team_id, start_ts, end_ts)
-    # GET_pitching_batter(session, team_id, start_ts, end_ts)
-    # GET_pitching_runs(session, team_id, start_ts, end_ts)
+
+def write_hitting_stats(filename, hitting_stats):
+    if not filename:
+        filename = 'output_hitting.csv'
+
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Name', 'AB', 'R', 'H', '2B', '3B', 'HR', 'RBI', 'BB', 'IBB', 'SO', 'SB', 'CS', 'SAC_F', 'SAC_B', 'HBP'])
+
+        hitters = list(hitting_stats.keys())
+        hitters.sort()
+
+        for player in hitters:
+            stats = hitting_stats[player]
+            writer.writerow([player,
+                             stats.ab, 
+                             stats.r, 
+                             stats.h, 
+                             stats.doubles, 
+                             stats.triples, 
+                             stats.hr, 
+                             stats.rbi, 
+                             stats.bb,
+                             stats.ibb,
+                             stats.so,
+                             stats.sb,
+                             stats.cs,
+                             stats.sac_f,
+                             stats.sac_b,
+                             stats.hbp])
+
+
+def write_pitching_stats(filename, pitching_stats):
+    if not filename:
+        filename = 'output_pitching.csv'
+    
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Name', 'Started', 'W', 'L', 'CG', 'SHO', 'SV', 'SVO', 'IP', 'H', 'R', 'ER', 'HR', 'HBP', 'BB', 'IBB', 'SO', 'BK', 'WP', 'PK'])
+
+        pitchers = list(pitching_stats.keys())
+        pitchers.sort()
+
+        for player in pitchers: 
+            stats = pitching_stats[player]
+            writer.writerow([player,
+                             stats.started,
+                             stats.w,
+                             stats.l,
+                             stats.cg,
+                             stats.sho,
+                             stats.sv,
+                             stats.svo, 
+                             stats.ip,
+                             stats.h,
+                             stats.r, 
+                             stats.er, 
+                             stats.hr, 
+                             stats.hbp, 
+                             stats.bb, 
+                             stats.ibb, 
+                             stats.so, 
+                             stats.bk, 
+                             stats.wp, 
+                             stats.pk])
