@@ -14,40 +14,32 @@ csrfmiddlewaretoken = ''
 def gc_init():
     # load environment variables
     load_dotenv()
+
+
     
-def TEST_john():
-    url = "https://gc.com/login"
+def TEST_john(session):
+    global session_cookies
+    global csrfmiddlewaretoken
 
-    payload = {}
-    headers = {}
-
-    response = requests.request("GET", url, headers=headers, data=payload)
+    response = session.request('GET', BASE_URL + LOGIN_URI)
 
     csrftoken_pattern = re.compile(r"csrftoken=([A-Za-z0-9]+);")
-    csrftoken = ''
-    for header, value in response.headers.items():
-        if header == 'Set-Cookie':
-            try:
-                csrftoken = csrftoken_pattern.findall(value)[0]
-                break
-            except IndexError:
-                print('Could not find csrftoken token in /login.')
-                print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
-                print('---------------------------------------------------------------------------------------')
-
-    print(f'csrftoken={csrftoken}')
-
     csrfmiddlewaretoken_pattern = re.compile(r"name='csrfmiddlewaretoken' value='([A-Za-z0-9]+)'")
     try:
-        global csrfmiddlewaretoken
+        # find csrftoken
+        set_cookie = response.headers['Set-Cookie']
+        csrftoken = csrftoken_pattern.findall(set_cookie)[0]
+        session_cookies = f'{CSRFTOKEN}={csrftoken}'
+
+        # find csrfmiddlewaretoken
         csrfmiddlewaretoken = csrfmiddlewaretoken_pattern.findall(response.text)[0]
-    except:
-        print('Could not find csrfmiddlewaretoken')
-        return
+    except KeyError:
+        print('Could not find Set-Cookie to look for csrftoken. Aborting...')
+        exit(1)
+    except IndexError:
+        print('Could not find both csrftoken and csrfmiddlewaretoken. Aborting...')
+        exit(1)
 
-    print(f'csrfmiddlewaretoken={csrfmiddlewaretoken}')
-
-    url = "https://gc.com/do-login"
 
     payload = f'csrfmiddlewaretoken={csrfmiddlewaretoken}&email={os.getenv(EMAIL)}&password={os.getenv(PASSWORD)}'
     headers = {
@@ -56,23 +48,22 @@ def TEST_john():
         'Cookie': f'csrftoken={csrftoken}'
     }
 
-    response = requests.request("POST", url, headers=headers, data=payload)
+    response = requests.request('POST', BASE_URL + DO_LOGIN_URI, headers=headers, data=payload)
     secure_sessionid_pattern = re.compile(r"gcdotcom_secure_sessionid=([A-Za-z0-9]+);")
     sessionid_pattern = re.compile(r"gcdotcom_sessionid=([A-Za-z0-9]+);")
-    secure_sessionid = ''
-    sessionid = ''
-    for header, value in response.headers.items():
-        if header == 'Set-Cookie':
-            try:
-                secure_sessionid = secure_sessionid_pattern.findall(value)[0]
-                sessionid = sessionid_pattern.findall(value)[0]
-            except IndexError:
-                print('Could not find GC session ids')
-                print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
-                print('---------------------------------------------------------------------------------------')
+    try:
+        set_cookie = response.headers['Set-Cookie']
+        secure_sessionid = secure_sessionid_pattern.findall(set_cookie)[0]
+        sessionid = sessionid_pattern.findall(set_cookie)[0]
+        session_cookies += f'; {SECURE_SESSIONID}={secure_sessionid}; {SESSIONID}={sessionid}'
+    except KeyError:
+        print('Could not find Set-Cookie to look for session ids. Aborting...')
+        exit(1)
+    except IndexError:
+        print('Found Set-Cookie, but could not find session ids. Aborting...')
+        exit(1)
 
-    global session_cookies
-    session_cookies = f'{CSRFTOKEN}={csrftoken}; {SECURE_SESSIONID}={secure_sessionid}; {SESSIONID}={sessionid}'
+    
     print(f'SESSION COOKIES SET: {session_cookies}')
 
 
@@ -203,4 +194,6 @@ def write_pitching_stats(filename, pitching_stats):
 
 if __name__ == "__main__":
     gc_init()
-    TEST_john()
+    with requests.Session() as session:
+        TEST_john(session)
+        POST_logout(session)

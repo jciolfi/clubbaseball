@@ -18,6 +18,8 @@ password=
 
 Your email and password are what you use to log onto GameChanger. 
 
+**Note:** that you must be admin (or have GameChanger premium) to access the stats.
+
 ### Instructions to Execute the Program
 1. Navigate to GameChanger Classic. Log in and select the "Season Stats" tab. Select the appropriate date range
 2. Copy the URL in the top bar.
