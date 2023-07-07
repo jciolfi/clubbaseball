@@ -1,4 +1,4 @@
-import os, re, sys, csv
+import os, re, sys, csv, requests
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
 from constants import *
@@ -58,32 +58,28 @@ def GET_login(session):
         return None
     
 def TEST_john():
-    import requests
-
     url = "https://gc.com/login"
 
     payload = {}
-    headers = {
-        # 'Cookie': 'csrftoken=8icJNE6etzesIJXe5m6tVYX3y31fJTPwLnOW8mXn9z3yAUN6W6xIQmLSXIKmSTo1'
-    }
+    headers = {}
 
     response = requests.request("GET", url, headers=headers, data=payload)
-    csrftoken = ''
+
     csrftoken_pattern = re.compile(r"csrftoken=([A-Za-z0-9]+);")
+    csrftoken = ''
     for header, value in response.headers.items():
         if header == 'Set-Cookie':
             try:
                 print(f'\n{header}: {value}\n')
 
                 csrftoken = csrftoken_pattern.findall(value)[0]
-                print(f'csrftoken={csrftoken}')
                 break
             except IndexError:
                 print('Could not find csrftoken token in /login.')
                 print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
-                print('-----------------------------------------')
+                print('---------------------------------------------------------------------------------------')
 
-    # print(response.text)
+    print(f'csrftoken={csrftoken}')
 
     csrfmiddlewaretoken_pattern = re.compile(r"name='csrfmiddlewaretoken' value='([A-Za-z0-9]+)'")
     csrfmiddlewaretoken = ''
@@ -94,22 +90,24 @@ def TEST_john():
         print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
         print('---------------------------------------------------------------------------------------')
         return None
-    
+
     print(f'csrfmiddlewaretoken={csrfmiddlewaretoken}')
 
     url = "https://gc.com/do-login"
 
-    payload = f'csrfmiddlewaretoken={csrfmiddlewaretoken}&email=ciolfi.j{os.getenv(EMAIL)}&password={os.getenv(PASSWORD)}'
+    payload = f'csrfmiddlewaretoken={csrfmiddlewaretoken}&email={os.getenv(EMAIL)}&password={os.getenv(PASSWORD)}'
     headers = {
         'Referer': 'https://gc.com/login',
         'Content-Type': 'application/x-www-form-urlencoded',
-        # 'Cookie': f'csrftoken={csrftoken}; gcdotcom_secure_sessionid=12b773ccz2b1ic0d0kg5yaxdyvhkdewh; gcdotcom_sessionid=uxc8u5fdspipry3og31a1auo6dps3itr; last_team_viewed=640424614cea87ae8c000001'
         'Cookie': f'csrftoken={csrftoken}'
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
 
     print(response.text)
+
+
+    
 
 
 
