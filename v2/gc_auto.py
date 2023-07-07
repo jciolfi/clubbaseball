@@ -8,6 +8,7 @@ from gc_hitting import GET_hitting
 from gc_pitching import GET_pitching
 
 session_cookies = ''
+csrfmiddlewaretoken = ''
 
 # initialize session cookies from .env
 def gc_init():
@@ -37,8 +38,8 @@ def TEST_john():
     print(f'csrftoken={csrftoken}')
 
     csrfmiddlewaretoken_pattern = re.compile(r"name='csrfmiddlewaretoken' value='([A-Za-z0-9]+)'")
-    csrfmiddlewaretoken = ''
     try:
+        global csrfmiddlewaretoken
         csrfmiddlewaretoken = csrfmiddlewaretoken_pattern.findall(response.text)[0]
     except:
         print('Could not find csrfmiddlewaretoken')
@@ -76,7 +77,7 @@ def TEST_john():
 
 
 # log out of the GameChanger Classic account
-def POST_logout(session, csrfmiddlewaretoken):
+def POST_logout(session):
     # send request to POST /do-logout
     payload = f'{CSRFMIDDLEWARETOKEN}={csrfmiddlewaretoken}'
     headers = {
@@ -86,7 +87,7 @@ def POST_logout(session, csrfmiddlewaretoken):
     }
     response = session.request("POST", BASE_URL + DO_LOGOUT_URI, headers=headers, data=payload)
 
-    print(f'logout: {"Good" if response.status_code == 200 else "Bad"}')
+    print(f'logout: {"Logged out" if response.status_code == 200 else "Stayed logged in"}')
 
 
 # get hitting and pitching stats for the selected date range

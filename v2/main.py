@@ -62,3 +62,4 @@ if __name__ == "__main__":
         hitting_stats, pitching_stats = GET_stats(session, gc_url)
         write_hitting_stats(f'{hitting_name}.csv', hitting_stats)
         write_pitching_stats(f'{pitching_name}.csv', pitching_stats)
+        POST_logout(session)
