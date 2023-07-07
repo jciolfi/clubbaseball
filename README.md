@@ -9,23 +9,22 @@ Need to copy/paste stats tables from "Season Stats" tab into the corresponding v
 This is a more automated option. It will log in for you and output the same information with you doing less work. All you need to do is the setup, and then you are good to go.
 
 ### .env
-Create a filename called `.env` in the `v2` folder. Copy and paste the following into it:
+1. `touch v2/.env`
+2. Open the file `v2/.env` in any text editor and paste the following into it. Fill in the email and password you use to log into GameChanger:
 
 ```
 email=
 password=
 ```
 
-Your email and password are what you use to log onto GameChanger. 
 
 **Note:** that you must be admin (or have GameChanger premium) to access the stats.
 
 ### Instructions to Execute the Program
 1. Navigate to GameChanger Classic. Log in and select the "Season Stats" tab. Select the appropriate date range
 2. Copy the URL in the top bar.
-3. Change your directory into where /clubbaseball/v2 is located.
-4. Type "./run \<your_copied_url\>".
-5. If you would like to name the output spreadsheets, you can do so by appending "--hit \<name\>" and "--pitch \<name\>"'. If you do not specify names, they will be called "hit_stats.csv" and "pitch_stats.csv", respectively.
+3. Execute "./run \<your_copied_url\>".
+4. If you would like to name the output spreadsheets, you can do so by appending "--hit \<name\>" and "--pitch \<name\>"'. If you do not specify names, they will be called "hit_stats" and "pitch_stats", respectively.
 
 ### Example Usage
 - To access the help at any time, enter "./run --help-me"

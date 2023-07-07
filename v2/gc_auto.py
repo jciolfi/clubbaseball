@@ -96,7 +96,7 @@ def POST_logout(session):
     }
     response = session.request("POST", BASE_URL + DO_LOGOUT_URI, headers=headers, data=payload)
 
-    print(f'logout: {"Logged out" if response.status_code == 200 else "Stayed logged in"}')
+    print(f'\n\nLogout: {"Suceeded" if response.status_code == 200 else "still logged in"}')
 
 
 # get hitting and pitching stats for the selected date range
@@ -123,13 +123,13 @@ def GET_stats(session, url):
 
     # get the hitting stats and print them
     hitting_stats = GET_hitting(session, session_cookies, team_id, start_ts, end_ts)
-    print(hitting_stats)
-
-    print('\n\n\n')
+    print(f'\n--HITTING STATS--')
+    print_dict(hitting_stats)
 
     # get the pitching stats and print them
     pitching_stats = GET_pitching(session, session_cookies, team_id, start_ts, end_ts)
-    print(pitching_stats)
+    print(f'\n--PITCHING STATS--')
+    print_dict(pitching_stats)
 
     return hitting_stats, pitching_stats
 

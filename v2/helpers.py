@@ -26,3 +26,9 @@ def get_players_stats(session, url, session_cookies):
     headers = { 'Cookie': session_cookies }
     response = session.request("GET", url, headers=headers, data=payload)
     return response.json()['players']
+
+
+# print out dictionary in a prettier format
+def print_dict(map):
+    for key, val in map.items():
+        print(f'{key}: {val}')
