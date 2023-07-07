@@ -26,8 +26,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process a URL.')
     parser.add_argument('gamechanger_url', nargs='?', help='The GameChanger Season Stats URL to process')
     parser.add_argument('--help-me', action='store_true', help='Display help message')
-    parser.add_argument('--hit', nargs='?', const='', help='Specify the filename for the hitting stats, e.g. UConn_hitting1')
-    parser.add_argument('--pitch', '--filename_p', nargs='?', const='', help='Specify the filename for the pitching stats, e.g. UConn_pitching1')
+    parser.add_argument('--hit', nargs='?', const='', default='hit_stats', help='Specify the filename for the hitting stats, e.g. UConn_hitting1')
+    parser.add_argument('--pitch', '--filename_p', nargs='?', const='', default='pitch_stats', help='Specify the filename for the pitching stats, e.g. UConn_pitching1')
 
     # check if --help-me is inputted
     args = parser.parse_args()

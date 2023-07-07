@@ -25,7 +25,7 @@ Your email and password are what you use to log onto GameChanger.
 2. Copy the URL in the top bar.
 3. Change your directory into where /clubbaseball/v2 is located.
 4. Type "python main.py <your_copied_url>".
-5. If you would like to name the output spreadsheets, you can do so by appending "--hit <name>" and "--pitch <name>"'. If you do not specify names, they will be called "output_hitting" and "output_pitching", respectively.
+5. If you would like to name the output spreadsheets, you can do so by appending "--hit <name>" and "--pitch <name>"'. If you do not specify names, they will be called "hit_stats.csv" and "pitch_stats.csv", respectively.
 
 ### Example Usage
 - To access the help at any time, enter "python main.py --help-me"
