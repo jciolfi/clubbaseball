@@ -24,10 +24,10 @@ Your email and password are what you use to log onto GameChanger.
 1. Navigate to GameChanger Classic. Log in and select the "Season Stats" tab. Select the appropriate date range
 2. Copy the URL in the top bar.
 3. Change your directory into where /clubbaseball/v2 is located.
-4. Type "python main.py <your_copied_url>".
+4. Type "./run <your_copied_url>".
 5. If you would like to name the output spreadsheets, you can do so by appending "--hit <name>" and "--pitch <name>"'. If you do not specify names, they will be called "hit_stats.csv" and "pitch_stats.csv", respectively.
 
 ### Example Usage
-- To access the help at any time, enter "python main.py --help-me"
-- The general structure of the command is "python main.py <your_copied_url> --hit <name> --pitch name"
-- A concrete example of the command is "python main.py https://gc.com/t/spring-2023/northeastern-university-huskies-club-640424614cea87ae8c000001/stats --hit UConn_hit1 --pitch UConn_pitch1"
+- To access the help at any time, enter "./run --help-me"
+- The general structure of the command is "./run <your_copied_url> --hit <name> --pitch name"
+- A concrete example of the command is "./run https://gc.com/t/spring-2023/northeastern-university-huskies-club-640424614cea87ae8c000001/stats --hit UConn_hit1 --pitch UConn_pitch1"
