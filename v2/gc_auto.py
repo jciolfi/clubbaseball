@@ -15,33 +15,36 @@ def gc_init():
     load_dotenv()
 
     # set session cookies
-    global session_cookies
-    session_cookies = f'{SECURE_SESSIONID}={os.getenv(SECURE_SESSIONID)}; {SESSIONID}={os.getenv(SESSIONID)}'
+    # global session_cookies
+    # session_cookies = f'{SECURE_SESSIONID}={os.getenv(SECURE_SESSIONID)}; {SESSIONID}={os.getenv(SESSIONID)}'
+    session_cookies = f'{CSRFTOKEN}={os.getenv(CSRFTOKEN)}'
 
 
 # perform GET to /login: set the csrftoken, and return the csrfmiddlewaretoken
 def GET_login(session):
     # send request to /login
     global session_cookies
-    payload={}
-    headers = { 'Cookie': session_cookies }
+    payload = {}
+    headers = {
+        'Cookie': session_cookies
+    }
     response = session.request("GET", BASE_URL + LOGIN_URI, headers=headers, data=payload)
 
     # find csrftoken
-    csrftoken_pattern = re.compile(r"csrftoken=([A-Za-z0-9]+);")
-    for header, value in response.headers.items():
-        if header == 'Set-Cookie':
-            try:
-                print(f'\n{header}: {value}\n')
+    # csrftoken_pattern = re.compile(r"csrftoken=([A-Za-z0-9]+);")
+    # for header, value in response.headers.items():
+    #     if header == 'Set-Cookie':
+    #         try:
+    #             print(f'\n{header}: {value}\n')
 
-                csrftoken = csrftoken_pattern.findall(value)[0]
-                session_cookies = f'{CSRFTOKEN}={csrftoken}; {session_cookies}'
-                print(f'SESSION_COOKIES: {session_cookies}')
-                break
-            except IndexError:
-                print('Could not find csrftoken token in /login.')
-                print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
-                print('---------------------------------------------------------------------------------------')
+    #             csrftoken = csrftoken_pattern.findall(value)[0]
+    #             session_cookies += f'{CSRFTOKEN}={csrftoken}'
+    #             print(f'SESSION_COOKIES: {session_cookies}')
+    #             break
+    #         except IndexError:
+    #             print('Could not find csrftoken token in /login.')
+    #             print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
+    #             print('---------------------------------------------------------------------------------------')
 
     # find csrfmiddlewaretoken
     csrfmiddlewaretoken_pattern = re.compile(r"name='csrfmiddlewaretoken' value='([A-Za-z0-9]+)'")
@@ -54,9 +57,68 @@ def GET_login(session):
         print('---------------------------------------------------------------------------------------')
         return None
     
+def TEST_john():
+    import requests
+
+    url = "https://gc.com/login"
+
+    payload = {}
+    headers = {
+        # 'Cookie': 'csrftoken=8icJNE6etzesIJXe5m6tVYX3y31fJTPwLnOW8mXn9z3yAUN6W6xIQmLSXIKmSTo1'
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+    csrftoken = ''
+    csrftoken_pattern = re.compile(r"csrftoken=([A-Za-z0-9]+);")
+    for header, value in response.headers.items():
+        if header == 'Set-Cookie':
+            try:
+                print(f'\n{header}: {value}\n')
+
+                csrftoken = csrftoken_pattern.findall(value)[0]
+                print(f'csrftoken={csrftoken}')
+                break
+            except IndexError:
+                print('Could not find csrftoken token in /login.')
+                print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
+                print('-----------------------------------------')
+
+    # print(response.text)
+
+    csrfmiddlewaretoken_pattern = re.compile(r"name='csrfmiddlewaretoken' value='([A-Za-z0-9]+)'")
+    csrfmiddlewaretoken = ''
+    try:
+        csrfmiddlewaretoken = csrfmiddlewaretoken_pattern.findall(response.text)[0]
+    except IndexError:
+        print('Could not find csrfmiddleware token in /login.')
+        print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
+        print('---------------------------------------------------------------------------------------')
+        return None
+    
+    print(f'csrfmiddlewaretoken={csrfmiddlewaretoken}')
+
+    url = "https://gc.com/do-login"
+
+    payload = f'csrfmiddlewaretoken={csrfmiddlewaretoken}&email=ciolfi.j{os.getenv(EMAIL)}&password={os.getenv(PASSWORD)}'
+    headers = {
+        'Referer': 'https://gc.com/login',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        # 'Cookie': f'csrftoken={csrftoken}; gcdotcom_secure_sessionid=12b773ccz2b1ic0d0kg5yaxdyvhkdewh; gcdotcom_sessionid=uxc8u5fdspipry3og31a1auo6dps3itr; last_team_viewed=640424614cea87ae8c000001'
+        'Cookie': f'csrftoken={csrftoken}'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(response.text)
+
+
 
 # attempt to log into GameChanger Classic; if this fails, program is aborted
 def POST_login(session, csrfmiddlewaretoken):
+    global session_cookies
+
+    url = "https://gc.com/do-login"
+
     # send request to POST /do-login
     payload = f'{CSRFMIDDLEWARETOKEN}={csrfmiddlewaretoken}&{EMAIL}={os.getenv(EMAIL)}&{PASSWORD}={os.getenv(PASSWORD)}'
     headers = {
@@ -64,12 +126,35 @@ def POST_login(session, csrfmiddlewaretoken):
         'Content-Type': 'application/x-www-form-urlencoded',
         'Cookie': session_cookies
     }
-    response = session.request('POST', BASE_URL + DO_LOGIN_URI, headers=headers, data=payload)
+    print(f'PAYLOAD={payload}\nHEADERS={headers}')
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(response.text)
 
     # check for bad status (can't continue without authentication)
     if response.status_code != 200:
         print('Unable to log in. Are your email and password correct?')
         sys.exit(0)
+
+    gc_secure_sessionid_pattern = re.compile(r"gcdotcom_secure_sessionid=([A-Za-z0-9]+);")
+    gc_sessionid_pattern = re.compile(r"gcdotcom_sessionid=([A-Za-z0-9]+);")
+    for header, value in response.headers.items():
+        print(f'\n{header}: {value}\n')
+        if header == 'Set-Cookie':
+            try:
+                if value.startswith("gcdotcom_secure_sessionid"):
+                    gc_secure_sessionid = gc_secure_sessionid_pattern.findall(value)[0]
+                    session_cookies += f'; {SECURE_SESSIONID}={gc_secure_sessionid}'
+                elif value.startswith("gcdotcom_sessionid"):
+                    gc_sessionid = gc_sessionid_pattern.findall(value)[0]
+                    session_cookies += f'; {SESSIONID}={gc_sessionid}'
+                break
+            except IndexError:
+                print('Could not find csrftoken token in /login.')
+                print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
+                print('---------------------------------------------------------------------------------------')
+
+    print(f'SESSION_COOKIES: {session_cookies}')
 
 
 # log out of the GameChanger Classic account
@@ -195,3 +280,14 @@ def write_pitching_stats(filename, pitching_stats):
                              stats.bk, 
                              stats.wp, 
                              stats.pk])
+            
+
+if __name__ == "__main__":
+    import requests
+    gc_init()
+    # with requests.Session() as session:
+        # csrfmiddlewaretoken = GET_login(session)
+        # print(csrfmiddlewaretoken)
+        # print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+        # POST_login(session, '')
+    TEST_john()
