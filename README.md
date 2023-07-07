@@ -6,30 +6,19 @@ Need to copy/paste stats tables from "Season Stats" tab into the corresponding v
 - Pitching stat tables: "Standard", "Command", "Batter Results", "Runs & Running Game"
 
 ## v2
-This is a more automated option. It will log in for you and output the same information with you doing less work. All you need to do is the setup, and then you are good to go. Note that the session ids and csrftokens will expire; however, they are relatively long for GameChanger.
+This is a more automated option. It will log in for you and output the same information with you doing less work. All you need to do is the setup, and then you are good to go.
 
 ### .env
 Create a filename called `.env` in the `v2` folder. Copy and paste the following into it:
 
 ```
-gcdotcom_secure_sessionid=
-gcdotcom_sessionid=
-last_team_viewed=640424614cea87ae8c000001
 email=
 password=
 ```
 
 Your email and password are what you use to log onto GameChanger. 
 
-Your gcdotcom_secure_sessionid and gcdotcom_sessionid can be found by doing the following:
-1. Open the developer tools (F12 in chrome)
-2. Navigate to the "Network" tab
-3. Select "Doc"
-4. Navigate to https://gc.com/login
-5. Select the entry that says "login"
-6. Scroll and expand the Request Headers menu.
-7. Copy the values for `gcdotcom_secure_sessionid=...`, `gcdotcom_sessionid=...`
-8. Paste the respective values into the .env
+**Note:** that you must be admin (or have GameChanger premium) to access the stats.
 
 ### Instructions to Execute the Program
 1. Navigate to GameChanger Classic. Log in and select the "Season Stats" tab. Select the appropriate date range

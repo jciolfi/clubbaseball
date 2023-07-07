@@ -1,4 +1,4 @@
-import os, re, sys, csv
+import os, re, sys, csv, requests
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
 from constants import *
@@ -8,72 +8,85 @@ from gc_hitting import GET_hitting
 from gc_pitching import GET_pitching
 
 session_cookies = ''
+csrfmiddlewaretoken = ''
 
 # initialize session cookies from .env
 def gc_init():
     # load environment variables
     load_dotenv()
 
-    # set session cookies
-    global session_cookies
-    session_cookies = f'{SECURE_SESSIONID}={os.getenv(SECURE_SESSIONID)}; {SESSIONID}={os.getenv(SESSIONID)}'
-
-
-# perform GET to /login: set the csrftoken, and return the csrfmiddlewaretoken
+# perform vanilla GET to /login, find csrftoken and csrfmiddlewaretoken
 def GET_login(session):
-    # send request to /login
     global session_cookies
-    payload={}
-    headers = { 'Cookie': session_cookies }
-    response = session.request("GET", BASE_URL + LOGIN_URI, headers=headers, data=payload)
+    global csrfmiddlewaretoken
 
-    # find csrftoken
+    # send request
+    response = session.request('GET', BASE_URL + LOGIN_URI)
+
+    # regexes to find csrftoken and csrfmiddlewaretoken
     csrftoken_pattern = re.compile(r"csrftoken=([A-Za-z0-9]+);")
-    for header, value in response.headers.items():
-        if header == 'Set-Cookie':
-            try:
-                print(f'\n{header}: {value}\n')
-
-                csrftoken = csrftoken_pattern.findall(value)[0]
-                session_cookies = f'{CSRFTOKEN}={csrftoken}; {session_cookies}'
-                print(f'SESSION_COOKIES: {session_cookies}')
-                break
-            except IndexError:
-                print('Could not find csrftoken token in /login.')
-                print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
-                print('---------------------------------------------------------------------------------------')
-
-    # find csrfmiddlewaretoken
     csrfmiddlewaretoken_pattern = re.compile(r"name='csrfmiddlewaretoken' value='([A-Za-z0-9]+)'")
-    try:
-        csrfmiddlewaretoken = csrfmiddlewaretoken_pattern.findall(response.text)[0]
-        return csrfmiddlewaretoken
-    except IndexError:
-        print('Could not find csrfmiddleware token in /login.')
-        print('If you are already logged in, there will not be an issue. Otherwise, the program may crash.')
-        print('---------------------------------------------------------------------------------------')
-        return None
-    
 
-# attempt to log into GameChanger Classic; if this fails, program is aborted
-def POST_login(session, csrfmiddlewaretoken):
-    # send request to POST /do-login
-    payload = f'{CSRFMIDDLEWARETOKEN}={csrfmiddlewaretoken}&{EMAIL}={os.getenv(EMAIL)}&{PASSWORD}={os.getenv(PASSWORD)}'
+    try:
+        # find csrftoken
+        set_cookie = response.headers['Set-Cookie']
+        csrftoken = csrftoken_pattern.findall(set_cookie)[0]
+        session_cookies = f'{CSRFTOKEN}={csrftoken}'
+
+        # find csrfmiddlewaretoken
+        csrfmiddlewaretoken = csrfmiddlewaretoken_pattern.findall(response.text)[0]
+    except KeyError:
+        print('Could not find Set-Cookie to look for csrftoken. Aborting...')
+        exit(1)
+    except IndexError:
+        print('Could not find both csrftoken and csrfmiddlewaretoken. Aborting...')
+        exit(1)
+
+
+# perform authentication using .env provided email/password, set GameChanger session IDs
+def POST_login(session):
+    global session_cookies
+
+    # body contains csrfmiddlewaretoken, email, and password
+    payload = f'csrfmiddlewaretoken={csrfmiddlewaretoken}&email={os.getenv(EMAIL)}&password={os.getenv(PASSWORD)}'
+
+    # headers contains a referer, form data, and csrftoken from GET /login
     headers = {
         'Referer': 'https://gc.com/login',
         'Content-Type': 'application/x-www-form-urlencoded',
         'Cookie': session_cookies
     }
+
+    # send request
     response = session.request('POST', BASE_URL + DO_LOGIN_URI, headers=headers, data=payload)
 
-    # check for bad status (can't continue without authentication)
-    if response.status_code != 200:
-        print('Unable to log in. Are your email and password correct?')
-        sys.exit(0)
+    # regexes for GameChanger session IDs from response cookies
+    secure_sessionid_pattern = re.compile(r"gcdotcom_secure_sessionid=([A-Za-z0-9]+);")
+    sessionid_pattern = re.compile(r"gcdotcom_sessionid=([A-Za-z0-9]+);")
+    try:
+        set_cookie = response.headers['Set-Cookie']
+        secure_sessionid = secure_sessionid_pattern.findall(set_cookie)[0]
+        sessionid = sessionid_pattern.findall(set_cookie)[0]
+        session_cookies += f'; {SECURE_SESSIONID}={secure_sessionid}; {SESSIONID}={sessionid}'
+    except KeyError:
+        print('Could not find Set-Cookie to look for session ids. Aborting...')
+        exit(1)
+    except IndexError:
+        print('Found Set-Cookie, but could not find session ids. Aborting...')
+        exit(1)
+
+
+# perform full login flow
+def DO_login(session):
+    # gets csrftoken (in cookies for all requests) and csrfmiddlewaretoken (for csrf verification - 403 otherwise)
+    GET_login(session)
+
+    # gets gcdotcom_secure_sessionid and gcdotcom_sessionid. Combined with csrftoken in cookies, gives logged in state.
+    POST_login(session)
 
 
 # log out of the GameChanger Classic account
-def POST_logout(session, csrfmiddlewaretoken):
+def POST_logout(session):
     # send request to POST /do-logout
     payload = f'{CSRFMIDDLEWARETOKEN}={csrfmiddlewaretoken}'
     headers = {
@@ -83,7 +96,7 @@ def POST_logout(session, csrfmiddlewaretoken):
     }
     response = session.request("POST", BASE_URL + DO_LOGOUT_URI, headers=headers, data=payload)
 
-    print(f'logout: {"Good" if response.status_code == 200 else "Bad"}')
+    print(f'logout: {"Logged out" if response.status_code == 200 else "Stayed logged in"}')
 
 
 # get hitting and pitching stats for the selected date range
@@ -195,3 +208,10 @@ def write_pitching_stats(filename, pitching_stats):
                              stats.bk, 
                              stats.wp, 
                              stats.pk])
+            
+
+if __name__ == "__main__":
+    gc_init()
+    with requests.Session() as session:
+        DO_login(session)
+        POST_logout(session)
