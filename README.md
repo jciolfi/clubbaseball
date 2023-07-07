@@ -3,24 +3,7 @@
 ## Motivation
 The National Club Baseball Association (NCBA) allows teams to self-report their statistics and upload them onto their website. Stats are uploaded per-player in a particular order one-by-one:
 
-<style>
-    .image-container {
-        display: flex;
-        flex-wrap: wrap;
-        margin-right: -10px;
-        justify-content: center;
-    }
-    .image-container img {
-        width: 45%;
-        margin-right: 10px;
-        margin-bottom: 10px;
-    }
-</style>
-
-<div class="image-container">
-    <img src="media/entering%20stats/NCBA/NCBA%20hitting.png" alt="Image 1" />
-    <img src="media/entering%20stats/NCBA/NCBA%20pitching.png" alt="Image 2" />
-</div>
+![NCBA Hitting Stats](media/entering%20stats/NCBA/NCBA%20hitting.png)
 
 In GameChanger, the most popular digital option for recording baseball game statistics, the information required to enter statistics into the NCBA spans across separate, disparate tables. 
 
@@ -30,6 +13,8 @@ This code aims to automate the process of collecting statistics by pulling data 
 
 ## Demo
 See the following [video](https://youtu.be/wzqZL1Tiu7w) for a demo on the setup and execution for the stats scraper. Fast forward to 0:45 to skip the setup and just see a demo.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/wzqZL1Tiu7w" frameborder="0" allowfullscreen></iframe>
 
 ## v2
 This is a more automated option. It will log in for you and output the same information with you doing less work. All you need to do is the setup, and then you are good to go.
