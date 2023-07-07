@@ -56,10 +56,12 @@ if __name__ == "__main__":
 
     with requests.Session() as session:
         # log in and get csrfmiddlewaretoken for authentication
-        TEST_john(session)
+        DO_login(session)
         
         # scrape the hitting and pitching stats, export them to respective csv's
         hitting_stats, pitching_stats = GET_stats(session, gc_url)
         write_hitting_stats(f'{hitting_name}.csv', hitting_stats)
         write_pitching_stats(f'{pitching_name}.csv', pitching_stats)
+
+        # logout when finished
         POST_logout(session)

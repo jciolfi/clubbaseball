@@ -15,16 +15,18 @@ def gc_init():
     # load environment variables
     load_dotenv()
 
-
-    
-def TEST_john(session):
+# perform vanilla GET to /login, find csrftoken and csrfmiddlewaretoken
+def GET_login(session):
     global session_cookies
     global csrfmiddlewaretoken
 
+    # send request
     response = session.request('GET', BASE_URL + LOGIN_URI)
 
+    # regexes to find csrftoken and csrfmiddlewaretoken
     csrftoken_pattern = re.compile(r"csrftoken=([A-Za-z0-9]+);")
     csrfmiddlewaretoken_pattern = re.compile(r"name='csrfmiddlewaretoken' value='([A-Za-z0-9]+)'")
+
     try:
         # find csrftoken
         set_cookie = response.headers['Set-Cookie']
@@ -41,14 +43,24 @@ def TEST_john(session):
         exit(1)
 
 
+# perform authentication using .env provided email/password, set GameChanger session IDs
+def POST_login(session):
+    global session_cookies
+
+    # body contains csrfmiddlewaretoken, email, and password
     payload = f'csrfmiddlewaretoken={csrfmiddlewaretoken}&email={os.getenv(EMAIL)}&password={os.getenv(PASSWORD)}'
+
+    # headers contains a referer, form data, and csrftoken from GET /login
     headers = {
         'Referer': 'https://gc.com/login',
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Cookie': f'csrftoken={csrftoken}'
+        'Cookie': session_cookies
     }
 
-    response = requests.request('POST', BASE_URL + DO_LOGIN_URI, headers=headers, data=payload)
+    # send request
+    response = session.request('POST', BASE_URL + DO_LOGIN_URI, headers=headers, data=payload)
+
+    # regexes for GameChanger session IDs from response cookies
     secure_sessionid_pattern = re.compile(r"gcdotcom_secure_sessionid=([A-Za-z0-9]+);")
     sessionid_pattern = re.compile(r"gcdotcom_sessionid=([A-Za-z0-9]+);")
     try:
@@ -63,8 +75,14 @@ def TEST_john(session):
         print('Found Set-Cookie, but could not find session ids. Aborting...')
         exit(1)
 
-    
-    print(f'SESSION COOKIES SET: {session_cookies}')
+
+# perform full login flow
+def DO_login(session):
+    # gets csrftoken (in cookies for all requests) and csrfmiddlewaretoken (for csrf verification - 403 otherwise)
+    GET_login(session)
+
+    # gets gcdotcom_secure_sessionid and gcdotcom_sessionid. Combined with csrftoken in cookies, gives logged in state.
+    POST_login(session)
 
 
 # log out of the GameChanger Classic account
@@ -195,5 +213,5 @@ def write_pitching_stats(filename, pitching_stats):
 if __name__ == "__main__":
     gc_init()
     with requests.Session() as session:
-        TEST_john(session)
+        DO_login(session)
         POST_logout(session)
