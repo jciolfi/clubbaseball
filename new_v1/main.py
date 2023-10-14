@@ -22,7 +22,7 @@ def parse_stats(fp):
         # player got > 0 PAs
         if int(row[4]) > 0:
             # AB, R, H, 2B, 3B, HR, RBI, BB, IBB, SO, SB, CS, SAC-F, SAC-B, HBP
-            offensive_stats[player_name] = Offsense(row[5], row[16], row[10], row[12], row[13], row[14], row[15], row[17], 'N/A', row[18], row[25], row[27], row[21], row[22], row[20])
+            offensive_stats[player_name] = Offsense(row[5], row[16], row[10], row[12], row[13], row[14], row[15], row[17], 'N/A', row[18], row[25], row[27], row[22], row[21], row[20])
 
         # player threw more than 0 pitches
         if int(row[58]) > 0:
@@ -97,13 +97,13 @@ def export_stats(filename):
 
 if __name__ == "__main__":
     argc = len(sys.argv)
-    if not (3 <= argc <= 4):
+    if not (2 <= argc <= 3):
         print("Usage: ./run [path_to_exported_stats.csv]")
         print("Usage: ./run [path_to_exported_stats.csv] [output_filename]")
         exit(1)
 
-    stats_path = sys.argv[2]
-    output_filename = sys.argv[3] if argc == 4 else "gc_stats"
+    stats_path = sys.argv[1]
+    output_filename = sys.argv[2] if argc == 3 else "gc_stats"
     fp = None
     try:
         fp = open(stats_path)
