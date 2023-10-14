@@ -211,7 +211,8 @@ def write_pitching_stats(filename, pitching_stats):
             
 
 if __name__ == "__main__":
-    gc_init()
-    with requests.Session() as session:
-        DO_login(session)
-        POST_logout(session)
+    print('hello world')
+    # gc_init()
+    # with requests.Session() as session:
+    #     DO_login(session)
+    #     POST_logout(session)
