@@ -11,10 +11,7 @@ def parse_stats(fp):
     next(reader)
     global hitting_stats, pitching_stats
     for row in reader:
-        try:
-            # first row should be player number
-            int(row[0])
-        except:
+        if row[0] == "Totals":
             break
 
         player_name = f"{row[1]}, {row[2]}"
@@ -25,6 +22,7 @@ def parse_stats(fp):
             offensive_stats[player_name] = Offsense(row[5], row[16], row[10], row[12], row[13], row[14], row[15], row[17], 'N/A', row[18], row[25], row[27], row[22], row[21], row[20])
 
         # player threw more than 0 pitches
+        print(f"{player_name}: {row[58]}")
         if int(row[58]) > 0:
             # started, W, L, CG, SHO, SV, SVO, IP, H, R, ER, HR, HBP, BB, IBB, SO, BK, WP, PK
             pitching_stats[player_name] = Pitching(row[56], row[59], row[60], '0', '0', row[61], row[62], row[54], row[65], row[66], row[67], row[106], row[71], row[68], 'N/A', row[69], row[75], row[80], row[76])
