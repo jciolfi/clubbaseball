@@ -35,8 +35,8 @@ See the following [video](https://youtu.be/wzqZL1Tiu7w) for a demo on the setup 
 This is a more automated option. It will sign in for you and output the same information with you doing less work. All you need to do is the setup, and then you are good to go.
 
 ### .env
-1. `touch v2/.env`
-2. Open the file `v2/.env` in any text editor and paste the following into it. Fill in the email and password you use to sign into GameChanger:
+1. `touch classic_v2/.env`
+2. Open the file `classic_v2/.env` in any text editor and paste the following into it. Fill in the email and password you use to sign into GameChanger:
 
 ```
 email=
