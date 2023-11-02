@@ -1,13 +1,13 @@
 # clubbaseball
 
 ## Motivation
-The National Club Baseball Association (NCBA) allows teams to self-report their statistics and upload them onto their website. Stats are uploaded per-player in a particular order one-by-one:
+The National Club Baseball Association (NCBA) wants teams to report each game's statistics by uploading them onto their website. Stats are uploaded in a particular order player-by-player:
 
 ![NCBA Hitting Stats](media/entering%20stats/NCBA/NCBA%20hitting.png)
 
 In GameChanger, the most popular digital option for recording baseball game statistics, the information required to enter statistics into the NCBA spans across separate, disparate tables. 
 
-In the NCBA website, all statistics that weren't submitted are cleared when the currently selected player is switched. This means that filling out each player requires switching across 3+ tables on the GameChanger website, which is extremely inefficient and tedious.
+On the NCBA website, all statistics that weren't submitted are cleared when the currently selected player is switched. This means that filling out each player requires switching across 3+ tables on the GameChanger website, which is extremely inefficient and tedious.
 
 This code aims to automate the process of collecting statistics by pulling data from relevant tables in GameChanger and outputting the statistics in the order expected by the NCBA. **Note:** that you must be admin (or have GameChanger premium) to access the stats.
 
